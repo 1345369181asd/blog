@@ -28,6 +28,21 @@ class Category( models.Model ):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_navs(cls):
+        categories = cls.objects.filter(status=cls.STATUS_NORMAL)
+        nav_categories = []
+        normal_categories = []
+        for cate in categories:
+            if cate.is_nav:
+                nav_categories.append(cate)
+            else:
+                normal_categories.append(cate)
+
+        return {
+            'navs':nav_categories,
+            'categories':normal_categories,
+        }
 class Tag( models.Model ):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
@@ -64,7 +79,6 @@ class Post( models.Model ):
         (STATUS_DELETE , '删除' ) ,
         (STATUS_DRAFT, '草稿' ) ,
     )
-
     title = models.CharField( max_length = 255 , verbose_name = '标题' )
     desc = models.CharField( max_length = 1024 , blank = True , verbose_name = '摘要' )
     content = models.TextField( verbose_name = '正文' ,help_text = '正文必须为MarkDown格式' )
@@ -83,5 +97,33 @@ class Post( models.Model ):
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def get_by_tag(tag_id):
+        try:
+            tag = Tag.objects.get(id=tag_id)
+        except Tag.DoesNotExist:
+            tag = None
+            post_list = []
+        else:
+            post_list = tag.post_set.filter(status=Post.STATUS_NORMAL)\
+                .select_related('owner', 'category')
+        return post_list, tag
+
+    @staticmethod
+    def get_by_category(category_id):
+        try:
+            category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            category = None
+            post_list = []
+        else:
+            post_list = category.post_set.filter(status=Post.STATUS_NORMAL)\
+                .select_related('owner', 'category')
+        return post_list, category
+
+    @classmethod
+    def latest_posts(cls):
+        queryset = cls.objects.filter(status=cls.STATUS_NORMAL)
 
 
