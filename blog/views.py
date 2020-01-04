@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from config.models import SideBar
 from .models import Post,Tag,Category
 
 def post_list(request, category_id=None, tag_id=None):
@@ -33,6 +33,7 @@ def post_list(request, category_id=None, tag_id=None):
         'category':category,
         'tag':tag,
         'post_list':post_list,
+        'sidebars':SideBar.get_all(),
     }
     context.update(Category.get_navs())
     return render(request,'blog/list.html',context=context)
@@ -46,6 +47,7 @@ def post_detail(request, post_id=None):
 
     context = {
         'post':post,
+        'sidebars': SideBar.get_all(),
     }
     context.update(Category.get_navs())
     return render(request, 'blog/detail.html',context=context)
