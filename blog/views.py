@@ -1,13 +1,15 @@
+from django.db.models import Q
 from django.shortcuts import render
 from config.models import SideBar
-from .models import Post,Tag,Category
+from .models import Post,Category
+
 
 def post_list(request, category_id=None, tag_id=None):
     tag = None
     category = None
 
     if tag_id:
-        post_list, tag = Post.get_by_tag()
+        post_list, tag = Post.get_by_tag(tag_id)
     elif category_id:
         post_list, category = Post.get_by_category(category_id)
     else:
@@ -51,3 +53,4 @@ def post_detail(request, post_id=None):
     }
     context.update(Category.get_navs())
     return render(request, 'blog/detail.html',context=context)
+
